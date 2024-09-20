@@ -5,6 +5,16 @@
 
 using namespace std;
 
+
+int solve(int a, int b,vector<int>& fact,vector<int>& factInv){
+    int x =fact[a];
+    int y = factInv[b];
+    int z = factInv[a-b];
+    int ans = (x*y)%mod;
+    ans = (ans*z)%mod;      
+    return ans;
+}
+
 int modInv(int a,int b){
     if(b==0){
         return 1;
@@ -16,14 +26,6 @@ int modInv(int a,int b){
     return (a*modInv(a,b-1))%mod;
 }
 
-int solve(int a, int b,vector<int>& fact,vector<int>& factInv){
-    int x =fact[a];
-    int y = factInv[b];
-    int z = factInv[a-b];
-    int ans = (x*y)%mod;
-    ans = (ans*z)%mod;
-    return ans;
-}
 
 signed main(){
     

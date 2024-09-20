@@ -6,19 +6,28 @@
 using namespace std;
 
 int solve(vector<int>& arr){
-    int n = arr.size();
-    int ans =1;
-    for(int i =1;i<1000001;i++){
+    int max_Val = 1000001;
+    for(int gcd = max_Val; gcd>=1;gcd--){
+        int div =0;
+        for(int i = gcd ;i<=max_Val;i+=gcd){
+            div+=arr[i];
+        }
+        if(div>=2){
+            return gcd;
+        }
     }
-    return ans;
+    return 1;
 }
 
 signed main(){
     int n;
     cin >> n;
-    vector<int> arr(n);
+    
+    vector<int> arr(1000001,0);
     for(int i  =0 ;i<n;i++){
-        cin >> arr[i];
+        int x;
+        cin >> x;
+        arr[x]++;
     }
     cout << solve(arr) << endl;
     return 0;

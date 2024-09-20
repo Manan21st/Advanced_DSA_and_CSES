@@ -14,7 +14,7 @@ void sieve(){
 }
 
 int solve(int x){
-    return sieves[x];
+    return sieves[x];   
 }
 
 int main(){

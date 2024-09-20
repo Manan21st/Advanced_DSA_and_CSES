@@ -23,8 +23,20 @@ ll solve(vector<int>& coins, int target,int sum,int index){
     return dp[sum]=((ans1%mod)+(ans2%mod))%mod;
 }
 
+ll solve(vector<int>& coins, int target){
+    int n = coins.size();
+    dp[0]=1;
+    for(int i =1;i<=n;++i){
+        for(int j =0;j<=target;++j){
+            if(j-coins[i-1]>=0){
+                dp[j] = (dp[j]%mod + dp[j-coins[i-1]]%mod)%mod;
+            }
+        }
+    }
+    return dp[target];    
+}
+
 int main(){
-    memset(dp,-1,sizeof(dp));
     int n,x;
     cin>>n>>x;
 
@@ -33,6 +45,6 @@ int main(){
     for(int i =0;i<n;i++){
         cin>>coins[i];
     }
-    cout<< solve(coins,x,0,0)%mod << endl;
+    cout<< solve(coins,x)%mod << endl;
     return 0;
 }
