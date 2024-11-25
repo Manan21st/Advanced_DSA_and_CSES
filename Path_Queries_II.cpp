@@ -6,17 +6,6 @@
 
 using namespace std;
 
-void tour(int node, int par, vector<vector<int>>& adj, vector<int>& euler, vector<int>& tin, vector<int>& tout, int& timer){
-    tin[node] = timer++;
-    euler.push_back(node);
-    for(auto v: adj[node]){
-        if(v!=par){
-            tour(v, node, adj, euler, tin, tout, timer);
-        }
-    }
-    tout[node] = timer++;
-    euler.push_back(node);
-}
 
 template<typename T>
 class SegmentTree{
@@ -32,23 +21,21 @@ public:
     }
 
     T merge(T a, T b){
-        return a+b;
+        return max(a,b);
     }
 
-    void update(int qIdx, T val){
+    void update(int l, int r, T val){
         function<void(int,int,int)> func = [&](int tIdx,int tLeft, int tRight){
-            if(tLeft == tRight){
+            if(r<tLeft or l>tRight){
+                return;
+            }
+            if(l<=tLeft and tRight<=r){
                 tree[tIdx] = val;
                 return;
             }
-
             int tMid = tLeft + (tRight-tLeft)/2;
-            if(tLeft<=qIdx and qIdx<=tMid){
-                func(2*tIdx+1,tLeft,tMid);
-            }else{
-                func(2*tIdx+2,tMid+1,tRight);
-            }
-
+            func(2*tIdx+1,tLeft,tMid);
+            func(2*tIdx+2,tMid+1,tRight);
             tree[tIdx] = merge(tree[2*tIdx+1],tree[2*tIdx+2]);
         };
         func(0,0,N-1);
@@ -74,6 +61,19 @@ public:
     }
 };
 
+
+void dfs(int node, int parent, vector<vector<int>>& adj, vector<int>& euler, vector<int>& in, vector<int>& out, int& timer){
+    in[node] = timer++;
+    euler.push_back(node);
+    for(auto child: adj[node]){
+        if(child != parent){
+            dfs(child, node, adj, euler, in, out, timer);
+        }
+    }
+    euler.push_back(node);
+    out[node] = timer++;
+}
+
 signed main(){
     //This belongs to Manan Agrawal
     ios_base::sync_with_stdio(false);
@@ -82,50 +82,49 @@ signed main(){
     // cin>>test;
     for(int t =0;t<test;++t){
         int n,q;
-        cin>>n>>q;
-        vector<int> weights(n+1);
-        for(int i=1;i<=n;++i){
-            cin>>weights[i];
+        cin >> n >> q;
+        vector<int> values(n);
+        for(int i=0;i<n;++i){
+            cin>>values[i];
         }
-        vector<vector<int>> adj(n+1);
+        vector<vector<int>> adj(n);
         for(int i=0;i<n-1;++i){
             int u,v;
-            cin>>u>>v;
+            cin >> u >> v;
+            u--,v--;
             adj[u].push_back(v);
             adj[v].push_back(u);
         }
 
-        vector<int> euler;
-        vector<int> tin(n+1);
-        vector<int> tout(n+1);
+        vector<int> euler,in(n),out(n);
         int timer = 0ll;
-        tour(1,0,adj,euler,tin,tout,timer);
+        dfs(0,-1,adj,euler,in,out,timer);
 
-        SegmentTree<int> st(euler.size(), 0ll);
-        for(int i=1;i<=n;++i){
-            int node = i;
-            int idx1 = tin[node];
-            st.update(idx1, weights[node]);
-            int idx2 = tout[node];
-            st.update(idx2, -weights[node]);
+        SegmentTree<int> st(euler.size(),0);
+        for(int i=0;i<n;++i){
+            int inTime = in[i];
+            int outTime = out[i];
+            st.update(inTime,inTime,values[i]);
+            st.update(outTime,outTime,values[i]);
         }
 
         for(int i=0;i<q;++i){
             int type;
-            cin>>type;
+            cin >> type;
             if(type==1){
-                int node, w;
-                cin>>node>>w;
-                int idx1 = tin[node];
-                st.update(idx1, w);
-                int idx2 = tout[node];
-                st.update(idx2, -w);
-            }
-            else{
-                int node;
-                cin>>node;
-                int idx = tin[node];
-                cout << st.query(0, idx) << endl;
+                int idx,val;
+                cin >> idx >> val;
+                idx--;
+                int inTime = in[idx];
+                int outTime = out[idx];
+                st.update(inTime,inTime,val);
+                st.update(outTime,outTime,val);
+            }else{
+                int l,r;
+                cin >> l >> r;
+                l--,r--;
+                cout << in[l] << " " << in[r] << endl;
+                cout << st.query(in[l],in[r]) << endl;
             }
         }
     }
